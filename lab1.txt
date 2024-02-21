@@ -1,0 +1,63 @@
+#include <stdio.h>
+#include <stdlib.h>
+#define BIT_VALUE(value,noBit) (value >> noBit) & 1
+unsigned int counter = 0;
+void delay()
+{
+    int a,b;
+    for (a=0; a<147483647;a++)
+    {
+        for(b=0; b<512; b++);
+        {
+
+        }
+    }
+}
+/*
+int ViewBit(int value,int no_bit)
+{
+    int wynik = 0;
+
+    for(int i = 0; i<no_bit;i++)
+    {
+       value = value >> 1;
+    }
+
+
+    return value;
+}
+*/
+int main()
+{
+    int IntToGray(unsigned char input)
+    {
+        return (input >> 1) ^ input;
+    }
+    while(1)
+    {
+        printf("\r");
+        for (int i=7; i>=0; i--)
+        {
+            printf("%d",BIT_VALUE(2,i));
+        }
+        printf("    ");
+        for(int i=7;i>=0;i--)
+        {
+            printf("%d",BIT_VALUE(IntToGray(2),i));
+        }
+
+    }
+
+
+
+
+
+
+   /* printf("Hello world!\n");
+
+    int value = 7;
+    int no_bit = 1;
+    printf("%d",ViewBit(value,no_bit));
+    */
+    return 0;
+}
