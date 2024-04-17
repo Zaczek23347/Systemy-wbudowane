@@ -27,7 +27,7 @@
 #include <libpic30.h>
 #include <math.h>
 
-unsigned portValue = 0, snakeMove = 0, queueMove = 1, queueBuffor = 0,dziesietne = 0, jednosci = 0;
+unsigned portValue = 0, bcdValue = 0, snakeMove = 0, queueMove = 0, queueBuffor = 1, tens = 0, ones = 0;
 char prevS6 = 6, prevS7 = 7, currentS6 = 0, currentS7, program = 0;
 void __attribute__((interrupt, no_auto_psv)) _T1Interrupt(void){
     
@@ -36,32 +36,30 @@ void __attribute__((interrupt, no_auto_psv)) _T1Interrupt(void){
         portValue++;
         LATA = portValue;
     }
-    
     if (program == 1){ // licznik binarny od 255 do 0
         portValue--;
         LATA = portValue;
     }
-    
     if (program == 2){ // licznik Graya od 0 do 255
         portValue++;
         LATA = (portValue >> 1) ^ portValue;
     }
-    
     if (program == 3){ // licznik Graya od 255 do 0
         portValue--;
         LATA = (portValue >> 1) ^ portValue;
     }
-    
     if (program == 4){ // licznik BCD od 0 do 99
-        portValue++;
-        jednosci = portValue%10;
-        dziesietne = (portValue-jednosci)/10;
-        dziesietne = dziesietne * pow(2,4);
-        LATA = dziesietne+jednosci;
-        
+        bcdValue++;
+        ones = bcdValue%10;
+        tens = (bcdValue-ones)/10;
+        LATA = (tens*pow(2,4)+ones);
     }
-    
-   
+    if (program == 5){ // licznik BCD od 99 do 0
+        bcdValue--;
+        ones = bcdValue%10;
+        tens = (bcdValue-ones)/10;
+        LATA = (tens*pow(2,4)+ones);
+    }
     if (program == 6){ // wezyk poruszajacy sie lewo-prawo
         while(snakeMove < 5){
             snakeMove++;
@@ -75,12 +73,9 @@ void __attribute__((interrupt, no_auto_psv)) _T1Interrupt(void){
         }
     } 
         if (program == 7){ // kolejka
-            queueMove = queueMove*2;
-            if(queueMove == 128){
-                queueBuffor = 128;
-                queueMove = 0;
-            }
-            LATA = queueBuffor+queueMove;
+            queueBuffor++;
+            queueMove = 1*pow(2,queueBuffor);
+            LATA = queueMove;
     } 
     _T1IF = 0;
 }
@@ -100,7 +95,6 @@ int main(void) {
         currentS6 = PORTDbits.RD6;
         currentS7 = PORTDbits.RD7;
         
-        
         if(currentS6-prevS6 == -1){
             program--;
         }
@@ -113,7 +107,9 @@ int main(void) {
         if(program < 0){
             program = 8;
         }
-        
+        if(bcdValue > 99) bcdValue = 1;
+        if(bcdValue == 0) bcdValue = 99;
+        if(queueBuffor > 8) queueBuffor = 0;
     }
         
     return 0;
