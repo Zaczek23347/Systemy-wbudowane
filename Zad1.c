@@ -27,7 +27,7 @@
 #include <libpic30.h>
 #include <math.h>
 
-unsigned portValue = 0, bcdValue = 0, snakeMove = 0, queueMove = 0, queueBuffor = 1, tens = 0, ones = 0;
+unsigned portValue = 0, bcdValue = 0, snakeMove = 0, queueMove = 0, queueBuffor = 0, tens = 0, ones = 0, queueEnd = 0, iq = 7 ;
 char prevS6 = 6, prevS7 = 7, currentS6 = 0, currentS7, program = 0;
 void __attribute__((interrupt, no_auto_psv)) _T1Interrupt(void){
     
@@ -73,10 +73,20 @@ void __attribute__((interrupt, no_auto_psv)) _T1Interrupt(void){
         }
     } 
         if (program == 7){ // kolejka
-            queueBuffor++;
-            queueMove = 1*pow(2,queueBuffor);
-            LATA = queueMove;
-    } 
+        queueMove = 1*pow(2,queueBuffor);
+        if(queueBuffor == iq){
+            queueEnd = 255-(pow(2,iq)-1);
+            iq--;
+            queueMove = 0;
+            queueBuffor = 0;
+            LATA = queueEnd;
+        }
+        else{
+        LATA = queueEnd+queueMove;
+        queueBuffor++;
+        }
+        
+        }
     _T1IF = 0;
 }
 
@@ -110,6 +120,7 @@ int main(void) {
         if(bcdValue > 99) bcdValue = 1;
         if(bcdValue == 0) bcdValue = 99;
         if(queueBuffor > 8) queueBuffor = 0;
+        if(iq == 0) iq = 7,queueBuffor = 0, queueEnd = 0;
     }
         
     return 0;
