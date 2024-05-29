@@ -26,9 +26,17 @@
 #include "xc.h"
 #include <libpic30.h>
 #include <math.h>
+#define BIT_VALUE(value,noBit) (value >> noBit) & 1
 
-unsigned portValue = 0, bcdValue = 0, snakeMove = 0, queueMove = 0, queueBuffor = 0, tens = 0, ones = 0, queueEnd = 0, iq = 7 ;
+unsigned portValue = 0, bcdValue = 0, snakeMove = 0, queueMove = 0, queueBuffor = 0, tens = 0, ones = 0, queueEnd = 0, iq = 7, counter = 0, BIT = 0;
 char prevS6 = 6, prevS7 = 7, currentS6 = 0, currentS7, program = 0;
+int val = 1, xor = 0;
+
+int sprzezenie(unsigned int v){
+    //sprzezenie w oparciu o b1110011
+    return BIT_VALUE(v,0)^BIT_VALUE(v,1)^BIT_VALUE(v,2)^BIT_VALUE(v,5)^BIT_VALUE(v,6);
+}
+
 void __attribute__((interrupt, no_auto_psv)) _T1Interrupt(void){
     
     // sprawdz ktory podprogram ma sie uruchomic
@@ -65,14 +73,19 @@ void __attribute__((interrupt, no_auto_psv)) _T1Interrupt(void){
             snakeMove++;
             LATA = 7 * pow(2,snakeMove);
             __delay32(1500000);
+            
+            prevS6 = PORTDbits.RD6;
+            prevS7 = PORTDbits.RD7;
+            __delay32(15000);
         }
         while(snakeMove > 0){
-           snakeMove--;
-           LATA = 7 * pow(2,snakeMove);
-           __delay32(1500000);
+            snakeMove--;
+            LATA = 7 * pow(2,snakeMove);
+            __delay32(1500000);
         }
+        __delay32(150000);
     } 
-        if (program == 7){ // kolejka
+    if (program == 7){ // kolejka
         queueMove = 1*pow(2,queueBuffor);
         if(queueBuffor == iq){
             queueEnd = 255-(pow(2,iq)-1);
@@ -84,9 +97,18 @@ void __attribute__((interrupt, no_auto_psv)) _T1Interrupt(void){
         else{
         LATA = queueEnd+queueMove;
         queueBuffor++;
+        }  
+    }
+    if (program == 8){ // generator liczb pseudolosowych w oparciu b1110011
+        for(int i=0;i<5;i++){
+            xor = sprzezenie(val);
+            val = val>>1;
+            val += xor<<7;
+            LATA = val;
         }
         
-        }
+
+    }
     _T1IF = 0;
 }
 
@@ -99,6 +121,7 @@ int main(void) {
     _T1IP = 1;
     PR1 = 0x0FFF;
     while(1){
+        // przemieszczanie si? po programach za pomoc? przycisków
         prevS6 = PORTDbits.RD6;
         prevS7 = PORTDbits.RD7;
         __delay32(15000);
