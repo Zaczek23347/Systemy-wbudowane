@@ -77,11 +77,34 @@ void __attribute__((interrupt, no_auto_psv)) _T1Interrupt(void){
             prevS6 = PORTDbits.RD6;
             prevS7 = PORTDbits.RD7;
             __delay32(15000);
+            currentS6 = PORTDbits.RD6;
+            currentS7 = PORTDbits.RD7;
+            
+            if(currentS6-prevS6 == -1){
+            break;
+            }
+            if(currentS7-prevS7 == -1){
+            break;
+            }
+
         }
         while(snakeMove > 0){
             snakeMove--;
             LATA = 7 * pow(2,snakeMove);
             __delay32(1500000);
+            
+            prevS6 = PORTDbits.RD6;
+            prevS7 = PORTDbits.RD7;
+            __delay32(15000);
+            currentS6 = PORTDbits.RD6;
+            currentS7 = PORTDbits.RD7;
+            
+            if(currentS6-prevS6 == -1){
+            break;
+            }
+            if(currentS7-prevS7 == -1){
+            break;
+        }
         }
         __delay32(150000);
     } 
