@@ -21,6 +21,10 @@
 
 #include "xc.h"
 #include <libpic30.h>
+#include <stdio.h>
+#include <stdlib.h>
+
+
 
 // Defninicja makr tak by kod byl czytelny, przejrzysty, deskryptywny i przyjazny
 // uzytkownikowi
@@ -124,63 +128,18 @@ void LCD_init(){
     __delay_ms(2);
 }
 
-int append(int i){
+int append(int i, int n){
     
-    return (i+1)%3;
+    return (i+1)%n;
 }
-
-
-
-// Zdefiniowanie znaku niestandardowego w postaci tablicy 8x5 (8 linii po 5 kropek)
-
-unsigned char trefl[8] = {
-    0b00000,
-    0b00000,
-    0b01110,
-    0b01110,
-    0b11111,
-    0b11111,
-    0b00100,
-    0b00100
-};
-
-unsigned char pik[8] = {
-    0b00000,
-    0b00000,
-    0b00100,
-    0b01110,
-    0b11111,
-    0b11111,
-    0b10101,
-    0b00100
-};
-
-unsigned char karo[8] = {
-    0b00000,
-    0b00000,
-    0b00100,
-    0b01110,
-    0b11111,
-    0b11111,
-    0b01110,
-    0b00100,
-};
-
-unsigned char kier[8] = {
-    0b00000,
-    0b00000,
-    0b01010,
-    0b11111,
-    0b11111,
-    0b11111,
-    0b01110,
-    0b00100
-};
 
 int main(void) {
     
     unsigned portValue = 0x0001;
-    char current6 = 0, prev6 = 0, current7 = 0, prev7 = 0; //variables for buttons
+    char current6 = 0, prev6 = 0, current7 = 0, prev7 = 0, micPower = 0,current8 = 0, prev8 = 0, current9 = 0, prev9 = 0; //variables for buttons
+    int i = 0, start = 0, mins = 0, secs = 0, micTimer = 0;
+    char minsTxt[5], secsTxt[5];
+    
     
     TRISB = 0x7FFF;     // Ustawienie rejestrow kierunku
     TRISE = 0x0000;
@@ -190,35 +149,93 @@ int main(void) {
     
 
     LCD_init();                     // Inicjalizacja wyswietlacza
-    LCD_saveCustChar(0, trefl);
-    LCD_saveCustChar(1, pik);
-    LCD_saveCustChar(2, karo);
-    LCD_saveCustChar(3, kier);
-    LCD_setCursor(1,5);             // Ustawienie kursora na poczatku drugiej linii
-    LCD_print("Vegas");             // Zapisanie znaku 'symbol1' do pamieci CGRAM
-    LCD_setCursor(2,5);             // Ustawienie kursora na poczatku drugiej linii
-    LCD_print("Kasyno");            // Wyswietlenie napisu
+    LCD_setCursor(1,0);             // Ustawienie kursora na poczatku drugiej linii
+                                    // Wyswietlenie napisu
                                     // Wyswietlenie znaku ze slotu 0 w pamieci CGRAM
     __delay_ms(500);
     
-    int i = 0;
     
     while(1){
-        LATA = portValue;
+        
+        mins = (micTimer-(micTimer%60))/60;
+        secs = micTimer%60;
+        
+        sprintf(minsTxt, "%d", mins);
+        sprintf(secsTxt, "%d", secs);
+        
+
+        
+
+        LCD_setCursor(1,8);
+        if (mins < 10)LCD_print("0");
+        LCD_print((unsigned char*)minsTxt);
+        LCD_print(":");
+        if (secs < 10)LCD_print("0");
+        LCD_print((unsigned char*)secsTxt);
+        sprintf(secsTxt, "%u", micTimer);
+        
+        
+        
         prev6 = PORTDbits.RD6;      //scanning for a change of buttons' state
         prev7 = PORTDbits.RD7;
+        prev8 = PORTAbits.RA7;
+        prev9 = PORTDbits.RD13;
+        
         __delay32(150000);
         current6 = PORTDbits.RD6;
         current7 = PORTDbits.RD7;
-
-        if (current6 - prev6 == 1) //button up
-        {
-            portValue++;
+        current8 = PORTAbits.RA7;
+        current9 = PORTDbits.RD13;
+        
+        if(start == 1){
+        if(current9 - prev9 == 1) start = 0;
+        if(micTimer == 0) start = 0;
+        else micTimer--;
+        __delay_ms(1000);
+            
         }
-
-        if (current7 - prev7 == 1)  //button down
+        
+        
+        if (current8 - prev8 == 1) //reset button
         {
-            portValue--;
+            micTimer = 0;
+        }
+        
+        if (current9 - prev9 == 1) //start/stop button
+        {
+            start = append(start,2);
+        }     
+       
+        
+        if (current7 - prev7 == 1) //add time button button
+        {
+            micTimer = micTimer+30;
+        }  
+        
+        
+        if (current6 - prev6 == 1) //power button
+        {
+            micPower = append(micPower, 5);
+        }
+        if (micPower == 0) {
+            LCD_setCursor(1,0);
+            LCD_print("0%  ");
+        }
+        else if(micPower == 1){
+            LCD_setCursor(1,0);
+            LCD_print("25% ");
+        }
+        else if(micPower == 2){
+            LCD_setCursor(1,0);
+            LCD_print("50% ");
+        }
+        else if(micPower == 3){
+            LCD_setCursor(1,0);
+            LCD_print("75% ");
+        }
+        else if(micPower == 4){
+            LCD_setCursor(1,0);
+            LCD_print("100%");
         }
         
         
