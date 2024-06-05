@@ -28,7 +28,7 @@
 #include <math.h>
 #define BIT_VALUE(value,noBit) (value >> noBit) & 1
 
-unsigned portValue = 0, bcdValue = 0, snakeMove = 0, queueMove = 0, queueBuffor = 0, tens = 0, ones = 0, queueEnd = 0, iq = 7, counter = 0, BIT = 0;
+unsigned portValue = 0, bcdValue = 0, snakeMove = 0, snakeDir = 1, queueMove = 0, queueBuffor = 0, tens = 0, ones = 0, queueEnd = 0, iq = 7, counter = 0, BIT = 0;
 char prevS6 = 6, prevS7 = 7, currentS6 = 0, currentS7, program = 0;
 int val = 1, xor = 0;
 
@@ -69,44 +69,23 @@ void __attribute__((interrupt, no_auto_psv)) _T1Interrupt(void){
         LATA = (tens*pow(2,4)+ones);
     }
     if (program == 6){ // wezyk poruszajacy sie lewo-prawo
-        while(snakeMove < 5){
+        
+        if (snakeDir == 1){
+            if(snakeMove == 5) snakeDir = 0;
             snakeMove++;
             LATA = 7 * pow(2,snakeMove);
-            __delay32(1500000);
             
-            prevS6 = PORTDbits.RD6;
-            prevS7 = PORTDbits.RD7;
-            __delay32(15000);
-            currentS6 = PORTDbits.RD6;
-            currentS7 = PORTDbits.RD7;
-            
-            if(currentS6-prevS6 == -1){
-            break;
-            }
-            if(currentS7-prevS7 == -1){
-            break;
-            }
 
         }
-        while(snakeMove > 0){
+        if(snakeDir == 0){
+            if(snakeMove == 0) snakeDir = 1;
             snakeMove--;
             LATA = 7 * pow(2,snakeMove);
-            __delay32(1500000);
             
-            prevS6 = PORTDbits.RD6;
-            prevS7 = PORTDbits.RD7;
-            __delay32(15000);
-            currentS6 = PORTDbits.RD6;
-            currentS7 = PORTDbits.RD7;
-            
-            if(currentS6-prevS6 == -1){
-            break;
-            }
-            if(currentS7-prevS7 == -1){
-            break;
+
+        
         }
-        }
-        __delay32(150000);
+        
     } 
     if (program == 7){ // kolejka
         queueMove = 1*pow(2,queueBuffor);
