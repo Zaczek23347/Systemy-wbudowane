@@ -137,7 +137,7 @@ int main(void) {
     
     unsigned portValue = 0x0001;
     char current6 = 0, prev6 = 0, current7 = 0, prev7 = 0, micPower = 0,current8 = 0, prev8 = 0, current9 = 0, prev9 = 0; //variables for buttons
-    int i = 0, start = 0, g1mins = 0, g1secs = 0, g2mins = 0, g2secs = 0, g1Timer = 120, g2Timer =120, player = 0, timeMode = 0, startTime = 0;
+    int i = 0, start = 0, g1mins = 0, g1secs = 0, g2mins = 0, g2secs = 0, g1Timer = 30, g2Timer =30, player = 0, timeMode = 0, startTime = 0;
     char g1minsTxt[5], g1secsTxt[5], g2minsTxt[5], g2secsTxt[5];
     
     
@@ -152,10 +152,12 @@ int main(void) {
     LCD_setCursor(1,0);             // Ustawienie kursora na poczatku drugiej linii
                                     // Wyswietlenie napisu
                                     // Wyswietlenie znaku ze slotu 0 w pamieci CGRAM
-    __delay_ms(500);
     
     
     while(1){
+        
+        
+        
         startTime = 1*30*(timeMode+1);
         
         g1mins = (g1Timer-(g1Timer%60))/60;
@@ -203,28 +205,45 @@ int main(void) {
         current9 = PORTDbits.RD13;
         
         if(start == 1){
-        if(current9 - prev9 == 1) start = 0;
+        
+        if(player == 0){
         if(g1Timer == 0) start = 0;
-        else g1Timer--;
+        else g1Timer--;}
+        if(player == 1){
+        if(g2Timer == 0) start = 0;
+        else g2Timer--;}
         __delay_ms(1000);
             
-        }
-        if (current7 - prev7 == 1)// time mode change
-        {
-            
-        }
-        
-        if (current8 - prev8 == 1) //reset to current game time
-        {
-            g1Timer = 120;
-            g2Timer = 120;
         }
         
         if (current9 - prev9 == 1) //change player
         {
           player++;
           if(player > 1)player = 0;
+          
         }
+        if (current6 - prev6 == 1)
+        {
+            start++;
+            if(start > 1) start = 0;
+            
+        }
+        
+        
+        if (current7 - prev7 == 1)// time mode change
+        {
+           timeMode = append(timeMode,4);
+           g1Timer = startTime;
+           g2Timer = startTime;
+        }
+        
+        if (current8 - prev8 == 1) //reset to current game time
+        {
+            g1Timer = startTime;
+            g2Timer = startTime;
+            break;
+        }
+        
         
         
 
