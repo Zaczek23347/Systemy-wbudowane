@@ -128,17 +128,23 @@ void LCD_init(){
     __delay_ms(2);
 }
 
-int append(int i, int n){
+int append(int i, int n){ //zwi?ksz liczb? n razy
     
     return (i+1)%n;
 }
+
+int convert(float a){ //przekonwertuj dziesi?tny na ca?kowity
+    return (int)a;
+}
+
 
 int main(void) {
     
     unsigned portValue = 0x0001;
     char current6 = 0, prev6 = 0, current7 = 0, prev7 = 0, micPower = 0,current8 = 0, prev8 = 0, current9 = 0, prev9 = 0; //variables for buttons
-    int i = 0, start = 0, g1mins = 0, g1secs = 0, g2mins = 0, g2secs = 0, g1Timer = 30, g2Timer =30, player = 0, timeMode = 0, startTime = 0;
+    int i = 0, start = 0, g1mins = 0, g1secs = 0, g2mins = 0, g2secs = 0, player = 0, timeMode = 0, startTime = 0;
     char g1minsTxt[5], g1secsTxt[5], g2minsTxt[5], g2secsTxt[5];
+    float g1Timer = 30, g2Timer = 30;
     
     
     TRISB = 0x7FFF;     // Ustawienie rejestrow kierunku
@@ -160,10 +166,10 @@ int main(void) {
         
         startTime = 1*30*(timeMode+1);
         
-        g1mins = (g1Timer-(g1Timer%60))/60;
-        g1secs = g1Timer%60;
-        g2mins = (g2Timer-(g2Timer%60))/60;
-        g2secs = g2Timer%60;
+        g1mins = (convert(g1Timer)-(convert(g1Timer)%60))/60;
+        g1secs = convert(g1Timer)%60;
+        g2mins = (convert(g2Timer)-(convert(g2Timer)%60))/60;
+        g2secs = convert(g2Timer)%60;
         
         sprintf(g1minsTxt, "%d", g1mins);
         sprintf(g1secsTxt, "%d ", g1secs);
@@ -193,28 +199,69 @@ int main(void) {
         
         
         
+
+        
+        if(start == 1){
+            
         prev6 = PORTDbits.RD6;      //scanning for a change of buttons' state
         prev7 = PORTDbits.RD7;
         prev8 = PORTAbits.RA7;
         prev9 = PORTDbits.RD13;
         
-        __delay32(150000);
+        __delay_ms(100);
         current6 = PORTDbits.RD6;
         current7 = PORTDbits.RD7;
         current8 = PORTAbits.RA7;
         current9 = PORTDbits.RD13;
         
-        if(start == 1){
-        
         if(player == 0){
-        if(g1Timer == 0) start = 0;
-        else g1Timer--;}
-        if(player == 1){
-        if(g2Timer == 0) start = 0;
-        else g2Timer--;}
-        __delay_ms(1000);
+        if(convert(g1Timer) == 0) start = 0;
+        else g1Timer=g1Timer-0.15;
+        }
+        
+        else if(player == 1){
+        if(convert(g2Timer) == 0) start = 0;
+        else g2Timer=g2Timer-0.15;
+        }
+        
+        __delay_ms(50);
+        
+        if (current9 - prev9 == 1) //change player
+        {
+          player++;
+          if(player > 1)player = 0;
+          
+        }
+        if (current6 - prev6 == 1)
+        {
+            start++;
+            if(start > 1) start = 0;
             
         }
+        
+        if (current8 - prev8 == 1) //reset to current game time
+        {
+            g1Timer = startTime;
+            g2Timer = startTime;
+            break;
+        }
+        
+        
+            
+        }
+        
+        else{
+        prev6 = PORTDbits.RD6;      //scanning for a change of buttons' state
+        prev7 = PORTDbits.RD7;
+        prev8 = PORTAbits.RA7;
+        prev9 = PORTDbits.RD13;
+        
+        __delay_ms(150);
+        current6 = PORTDbits.RD6;
+        current7 = PORTDbits.RD7;
+        current8 = PORTAbits.RA7;
+        current9 = PORTDbits.RD13;
+        
         
         if (current9 - prev9 == 1) //change player
         {
@@ -242,6 +289,8 @@ int main(void) {
             g1Timer = startTime;
             g2Timer = startTime;
             break;
+        }
+        
         }
         
         
