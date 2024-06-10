@@ -42,25 +42,24 @@ int main(void) {
     char currentS6 = 0, currentS7 = 0, prevS6 = 0, prevS7 = 0;
     
     while(1){
+        //pobieraj przyciski oraz suwak
         while(!AD1CON1bits.DONE);
         prevS6 = PORTDbits.RD6;
-        prevS7 = PORTDbits.RD7;
         __delay32(1500000);
         currentS6 = PORTDbits.RD6;
-        currentS7 = PORTDbits.RD7;
         potValue = ADC1BUF0;
-        potValue = potValue>>2;
-        if(potValue >= 127){
+        potValue = potValue>>2; // przesunięcie bitowe, aby alarm działał po przekroczeniu 50% suwaka a nie 20%
+        if(potValue >= 127){ // sprawdź czy suwak jest w połowie lub więcej
             alarmTime++;
             __delay32(10000000);
             LATA = 1;
             __delay32(10000000);
             LATA = 0;
-            while(alarmTime >= 5 && PORTDbits.RD6){
+            while(alarmTime >= 5 && PORTDbits.RD6){ //jeżeli suwak jest powyzej połowy oraz alarm mrygał przez 5 sec, to zapal wszystkie diody
                 LATA = 255;
             }
         }
-        else{
+        else{// wyłącz alarm
             LATA = 0;
             alarmTime = 0;
         }
