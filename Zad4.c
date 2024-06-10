@@ -128,7 +128,7 @@ void LCD_init(){
     __delay_ms(2);
 }
 
-int append(int i, int n){
+int append(int i, int n){ //zwiększ o 1 do max n
     
     return (i+1)%n;
 }
@@ -157,7 +157,7 @@ int main(void) {
     
     while(1){
         
-        mins = (micTimer-(micTimer%60))/60;
+        mins = (micTimer-(micTimer%60))/60; //przekonwertuj czas na minuty i sekundy
         secs = micTimer%60;
         
         sprintf(minsTxt, "%d", mins);
@@ -166,7 +166,7 @@ int main(void) {
 
         
 
-        LCD_setCursor(1,8);
+        LCD_setCursor(1,8); 
         if (mins < 10)LCD_print("0");
         LCD_print((unsigned char*)minsTxt);
         LCD_print(":");
@@ -196,28 +196,28 @@ int main(void) {
         }
         
         
-        if (current8 - prev8 == 1) //reset button
+        if (current8 - prev8 == 1) //przycisk do resetu
         {
             micTimer = 0;
         }
         
-        if (current9 - prev9 == 1) //start/stop button
+        if (current9 - prev9 == 1) //przycisk start/stop
         {
             start = append(start,2);
         }     
        
         
-        if (current7 - prev7 == 1) //add time button button
+        if (current7 - prev7 == 1) //przycisk dodaj czas
         {
             micTimer = micTimer+30;
         }  
         
         
-        if (current6 - prev6 == 1) //power button
+        if (current6 - prev6 == 1) //przycisk zmiany mocy
         {
             micPower = append(micPower, 5);
         }
-        if (micPower == 0) {
+        if (micPower == 0) { //zależnie od mocy wyświelt jej wartość
             LCD_setCursor(1,0);
             LCD_print("0%  ");
         }
