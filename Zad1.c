@@ -123,26 +123,26 @@ int main(void) {
     _T1IP = 1;
     PR1 = 0x0FFF;
     while(1){
-        // przemieszczanie si? po programach za pomoc? przycisków
+        // przemieszczanie si? po programach za pomoc? przyciskÃ³w
         prevS6 = PORTDbits.RD6;
         prevS7 = PORTDbits.RD7;
         __delay32(15000);
         currentS6 = PORTDbits.RD6;
         currentS7 = PORTDbits.RD7;
         
-        if(currentS6-prevS6 == -1){
+        if(currentS6-prevS6 == -1){// zmiana programu
             program--;
         }
         if(currentS7-prevS7 == -1){
             program++;
         }
-        if(program > 8){
+        if(program > 8){//zapobieganie nie wybrania programu
             program = 0;
         }
         if(program < 0){
             program = 8;
         }
-        if(bcdValue > 99) bcdValue = 1;
+        if(bcdValue > 99) bcdValue = 1;//zapobieganie wychodzenia zmiennych poza ich skale
         if(bcdValue == 0) bcdValue = 99;
         if(queueBuffor > 8) queueBuffor = 0;
         if(iq == 0) iq = 7,queueBuffor = 0, queueEnd = 0;
