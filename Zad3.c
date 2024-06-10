@@ -124,7 +124,7 @@ void LCD_init(){
     __delay_ms(2);
 }
 
-int append(int i){
+int append(int i){// zwiększ i o 1 do max 4
     
     return (i+1)%4;
 }
@@ -197,6 +197,7 @@ int main(void) {
     int i = 0;
     
     while(1){
+        //wyświetlaj reklamę oraz zmieniaj pozycję symboli kart
         LCD_setCursor(1,0);
         LCD_sendData(i);
         LCD_sendData(i);
