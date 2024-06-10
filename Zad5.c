@@ -156,17 +156,16 @@ int main(void) {
 
     LCD_init();                     // Inicjalizacja wyswietlacza
     LCD_setCursor(1,0);             // Ustawienie kursora na poczatku drugiej linii
-                                    // Wyswietlenie napisu
-                                    // Wyswietlenie znaku ze slotu 0 w pamieci CGRAM
+
     
     
     while(1){
         
         
         
-        startTime = 1*30*(timeMode+1);
+        startTime = 1*30*(timeMode+1);//ustaw nowy tryb gry
         
-        g1mins = (convert(g1Timer)-(convert(g1Timer)%60))/60;
+        g1mins = (convert(g1Timer)-(convert(g1Timer)%60))/60;//przekonwertuj czasy graczy na minuty i sekundy
         g1secs = convert(g1Timer)%60;
         g2mins = (convert(g2Timer)-(convert(g2Timer)%60))/60;
         g2secs = convert(g2Timer)%60;
@@ -179,7 +178,7 @@ int main(void) {
 
         
 
-        LCD_setCursor(1,1);
+        LCD_setCursor(1,1);//wyświetl czasy graczy
         if(player == 0)LCD_print("*Gracz1: ");
         else LCD_print("Gracz1: ");
         if (g1mins < 10)LCD_print("0");
@@ -214,32 +213,32 @@ int main(void) {
         current8 = PORTAbits.RA7;
         current9 = PORTDbits.RD13;
         
-        if(player == 0){
+        if(player == 0){ //odejmuj czas gracza #1, jeżeli jest jego kolej
         if(convert(g1Timer) == 0) start = 0;
         else g1Timer=g1Timer-0.15;
         }
         
-        else if(player == 1){
+        else if(player == 1){ //odejmuj czas gracza #2, jeżeli jest jego kolej
         if(convert(g2Timer) == 0) start = 0;
         else g2Timer=g2Timer-0.15;
         }
         
         __delay_ms(50);
         
-        if (current9 - prev9 == 1) //change player
+        if (current9 - prev9 == 1) //przycisk zmień gracza
         {
           player++;
           if(player > 1)player = 0;
           
         }
-        if (current6 - prev6 == 1)
+        if (current6 - prev6 == 1)//przycisk zacznij grę
         {
             start++;
             if(start > 1) start = 0;
             
         }
         
-        if (current8 - prev8 == 1) //reset to current game time
+        if (current8 - prev8 == 1) //przycisk reset zegara
         {
             g1Timer = startTime;
             g2Timer = startTime;
@@ -263,13 +262,13 @@ int main(void) {
         current9 = PORTDbits.RD13;
         
         
-        if (current9 - prev9 == 1) //change player
+        if (current9 - prev9 == 1) //przycisk zmień gracza
         {
           player++;
           if(player > 1)player = 0;
           
         }
-        if (current6 - prev6 == 1)
+        if (current6 - prev6 == 1)//przycisk zacznij grę
         {
             start++;
             if(start > 1) start = 0;
@@ -277,14 +276,14 @@ int main(void) {
         }
         
         
-        if (current7 - prev7 == 1)// time mode change
+        if (current7 - prev7 == 1)//przycisk zmień tryb gry
         {
            timeMode = append(timeMode,4);
            g1Timer = startTime;
            g2Timer = startTime;
         }
         
-        if (current8 - prev8 == 1) //reset to current game time
+        if (current8 - prev8 == 1) //przycisk reset zegara
         {
             g1Timer = startTime;
             g2Timer = startTime;
